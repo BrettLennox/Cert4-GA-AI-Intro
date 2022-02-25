@@ -19,28 +19,35 @@ public class AIMovement : MonoBehaviour
     [Tooltip("The speed at which the AI moves")]
     public float speed = 1.5f;
 
+    private void Start()
+    {
+    }
+
     private void Update()
     {
-        if(Vector2.Distance(transform.position, player.position) < chaseDistance)
+        if (Vector2.Distance(transform.position, player.position) < chaseDistance)
         {
             AIMoveTowards(player);
+
         }
         else
         {
+            var dist = Vector3.Distance(transform.position, position[positionIndex].transform.position);
+            for(int i = 0; i < position.Length; i++)
+            {
+                var tempDistance = Vector3.Distance(transform.position, position[i].transform.position);
+                if(tempDistance < dist)
+                {
+                    positionIndex = i;
+                }
+            }
             AIMoveTowards(position[positionIndex].transform);
         }
     }
 
-    private void WaypointUpdate()
+    private void WaypointUpdate(int posIndex)
     {
-        if (positionIndex < position.Length - 1)
-        {
-            positionIndex++;
-        }
-        else
-        {
-            positionIndex = 0;
-        }
+        positionIndex = posIndex;
     }
 
     private void AIMoveTowards(Transform goal)
@@ -80,7 +87,14 @@ public class AIMovement : MonoBehaviour
         }
         else
         {
-            WaypointUpdate();
+            if (positionIndex < position.Length - 1)
+            {
+                positionIndex++;
+            }
+            else
+            {
+                positionIndex = 0;
+            }
         }
     }
 }
