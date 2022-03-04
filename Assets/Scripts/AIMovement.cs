@@ -12,51 +12,52 @@ public class AIMovement : MonoBehaviour
     public Transform player;
     [Tooltip("")]
     public float chaseDistance = 3f;
-    public GameObject[] position;
+    //public GameObject[] position;
+    public List<GameObject> position;
     public int positionIndex;
     public bool isChasing = false;
+    public GameObject waypointPrefab;
+    public GameObject waypointParent;
 
     [Header("Speed")]
     [Tooltip("The speed at which the AI moves")]
     public float speed = 1.5f;
 
-    private void Start()
+    public void NewWayPoint()
     {
+        float x = Random.Range(-9, 9.5f);
+        float y = Random.Range(-5, 5.5f);
+
+        GameObject newPoint = Instantiate(waypointPrefab, new Vector2(x,y), Quaternion.identity, waypointParent.transform);
+        position.Add(newPoint);
     }
 
-    private void Update()
+    public void FindClosestWaypoint()
     {
-        if (Vector2.Distance(transform.position, player.position) < chaseDistance)
-        {
-            isChasing = true;
-            AIMoveTowards(player);
-            
-        }
-        else
-        {
-            if (isChasing)
-            {
-                FindClosestWaypoint();
-                isChasing = false;
-            }
-            AIMoveTowards(position[positionIndex].transform);
-        }
-    }
+        float nearest = float.PositiveInfinity;
+        int nearestIndex = 0;
 
-    private void FindClosestWaypoint()
-    {
-        var dist = Vector3.Distance(transform.position, position[positionIndex].transform.position);
-        for (int i = 0; i < position.Length; i++)
+        for(int i = 0; i <position.Count; i++)
         {
-            var tempDistance = Vector3.Distance(transform.position, position[i].transform.position);
-            if (tempDistance < dist)
+            float distance = Vector2.Distance(transform.position, position[i].transform.position);
+            if(distance < nearest)
             {
-                positionIndex = i;
+                nearest = distance;
+                nearestIndex = i;
             }
         }
+
+        positionIndex = nearestIndex;
     }
 
-    private void AIMoveTowards(Transform goal)
+    public void RemoveCurrentWaypoint()
+    {
+        GameObject current = position[positionIndex];
+        position.Remove(current);
+        Destroy(current);
+    }
+
+    public void AIMoveTowards(Transform goal)
     {
         #region Commented Out
         //Vector2 AIPosition = transform.position;
@@ -93,14 +94,25 @@ public class AIMovement : MonoBehaviour
         }
         else
         {
-            if (positionIndex < position.Length - 1)
-            {
-                positionIndex++;
-            }
-            else
-            {
-                positionIndex = 0;
-            }
+            RemoveCurrentWaypoint();
+            WaypointUpdate();
         }
+    }
+
+    private void WaypointUpdate()
+    {
+        if (positionIndex < position.Count - 1)
+        {
+            positionIndex++;
+        }
+        else
+        {
+            positionIndex = 0;
+        }
+    }
+
+    public bool IsPlayerInRange()
+    {
+        return Vector2.Distance(transform.position, player.position) < chaseDistance;
     }
 }
