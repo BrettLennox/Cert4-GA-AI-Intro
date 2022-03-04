@@ -14,6 +14,7 @@ public class AIMovement : MonoBehaviour
     public float chaseDistance = 3f;
     public GameObject[] position;
     public int positionIndex;
+    public bool isChasing = false;
 
     [Header("Speed")]
     [Tooltip("The speed at which the AI moves")]
@@ -27,27 +28,32 @@ public class AIMovement : MonoBehaviour
     {
         if (Vector2.Distance(transform.position, player.position) < chaseDistance)
         {
+            isChasing = true;
             AIMoveTowards(player);
-
+            
         }
         else
         {
-            var dist = Vector3.Distance(transform.position, position[positionIndex].transform.position);
-            for(int i = 0; i < position.Length; i++)
+            if (isChasing)
             {
-                var tempDistance = Vector3.Distance(transform.position, position[i].transform.position);
-                if(tempDistance < dist)
-                {
-                    positionIndex = i;
-                }
+                FindClosestWaypoint();
+                isChasing = false;
             }
             AIMoveTowards(position[positionIndex].transform);
         }
     }
 
-    private void WaypointUpdate(int posIndex)
+    private void FindClosestWaypoint()
     {
-        positionIndex = posIndex;
+        var dist = Vector3.Distance(transform.position, position[positionIndex].transform.position);
+        for (int i = 0; i < position.Length; i++)
+        {
+            var tempDistance = Vector3.Distance(transform.position, position[i].transform.position);
+            if (tempDistance < dist)
+            {
+                positionIndex = i;
+            }
+        }
     }
 
     private void AIMoveTowards(Transform goal)
