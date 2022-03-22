@@ -12,6 +12,7 @@ public class AIManager : BaseManager
     }
     public State currentState;
     protected PlayerManager _playerManager;
+    [SerializeField] protected Animator _anim;
 
     protected override void Start()
     {
@@ -49,7 +50,7 @@ public class AIManager : BaseManager
     }
     private IEnumerator WaitAndEndTurn()
     {
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSecondsRealtime(2f);
         _playerManager.TakeTurn();
     }
     void HighHPState()
@@ -101,6 +102,7 @@ public class AIManager : BaseManager
     public void Splash()
     {
         Debug.Log("AI Used Splash");
+        _anim.SetTrigger("Splash");
         _playerManager.DealDamage(40.4f);
         EndTurn();
     }
